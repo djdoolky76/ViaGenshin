@@ -76,7 +76,7 @@ func (s *Server) ConsoleExecute(cmd, uid uint32, text string) (string, error) {
 		return "To execute command, type gm command here.", nil
 	}
 	if body.Retcode != 0 {
-		return "Failed to execute command: " + body.Data.Msg + ", Make sure keyword command is correct: " + body.Msg + "\nTips+ consoleWelcomeText, nil
+		return "Failed to execute command: " + body.Data.Msg + ", Make sure keyword command is correct: " + body.Msg + "\nTips"+ consoleWelcomeText, nil
 	}
 	return "The command was executed successfully: " + body.Data.Msg + "\nMsg" + consoleWelcomeText, nil
 }
