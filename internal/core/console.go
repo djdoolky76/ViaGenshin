@@ -18,11 +18,11 @@ const (
 	consoleNickname    = "djdoolky76"
 	consoleLevel       = uint32(60)
 	consoleWorldLevel  = uint32(8)
-	consoleSignature   = "Welcome to GIO Server"
+	consoleSignature   = "Welcome to Anjocally Server"
 	consoleNameCardId  = uint32(210001)
 	consoleAvatarId    = uint32(10000077)
 	consoleCostumeId   = uint32(0)
-	consoleWelcomeText = "Welcome to ViaGenshin Dev \nThis is experimental server, Major issues may arise."
+	consoleWelcomeText = "Welcome to Anjocally. \nThis is experimental server, Major issues may arise."
 )
 
 type MuipResponseBody struct {
@@ -57,7 +57,7 @@ func (s *Server) ConsoleExecute(cmd, uid uint32, text string) (string, error) {
 	logger.Debug().Msgf("MUIP Response: %s", uri)
 	resp, err := http.Get(uri)
 	if err != nil {
-		return "Muip Response: %s" + "\nWarn reminder that the sending options may be limited." + consoleWelcomeText, err
+		return "Muip Response: %s" + "\nWarning: reminder that the sending options may be limited." + consoleWelcomeText, err
 	}
 	defer resp.Body.Close()
 	p, err := io.ReadAll(resp.Body)
@@ -66,7 +66,7 @@ func (s *Server) ConsoleExecute(cmd, uid uint32, text string) (string, error) {
 	}
 	logger.Debug().Msgf("MUIP Response: %s", string(p))
 	if resp.StatusCode != 200 {
-		return "MUIP Response: %s" + "\nWarn reminder that the sending options may be limited." + consoleWelcomeText, fmt.Errorf("Status Code: %d", resp.StatusCode)
+		return "MUIP Response: %s" + "\nWarning: reminder that the sending options may be limited." + consoleWelcomeText, fmt.Errorf("Status Code: %d", resp.StatusCode)
 	}
 	body := new(MuipResponseBody)
 	if err := json.Unmarshal(p, body); err != nil {
@@ -76,7 +76,7 @@ func (s *Server) ConsoleExecute(cmd, uid uint32, text string) (string, error) {
 		return "To execute command, type gm command here.", nil
 	}
 	if body.Retcode != 0 {
-		return "Failed to execute command: " + body.Data.Msg + ", Make sure keyword command is correct: " + body.Msg + "\nTips"+ consoleWelcomeText, nil
+		return "Failed to execute command: " + body.Data.Msg + ", Make sure your keyword command is correct: " + body.Msg + "\nMessage:"+ consoleWelcomeText, nil
 	}
-	return "The command was executed successfully: " + body.Data.Msg + "\nMsg" + consoleWelcomeText, nil
+	return "The command was executed successfully: " + body.Data.Msg + "\nMessage:" + consoleWelcomeText, nil
 }
