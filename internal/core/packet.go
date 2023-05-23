@@ -46,18 +46,11 @@ func (s *Session) ConvertPacket(from, to mapper.Protocol, fromCmd uint16, head, 
 	if toDesc == nil {
 		return p, fmt.Errorf("unknown to message %s in %s", name, to)
 	}
-	toPacket := dynamic.NewMessage(toDesc)
-	if err := toPacket.UnmarshalJSONPB(UnmarshalOptions, toJson); err != nil {
-		return p, err
-	}
-	toJson, err = toPacket.MarshalJSONPB(MarshalOptions)
-	if err != nil {
-		return p, err
-	}
+	
 	return toPacket.Marshal()
 }
 
-func (s *Session) ConvertPacketByName(from, to mapper.Protocol, name string, p []byte) ([]byte, error) {
+func (s *Session) (from, to mapper.Protocol, name string, p []byte) ([]byte, error) {
 	fromDesc := s.mapping.MessageDescMap[from][name]
 	if fromDesc == nil {
 		return p, fmt.Errorf("unknown from message %s in %s", name, from)
