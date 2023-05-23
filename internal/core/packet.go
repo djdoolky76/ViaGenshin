@@ -50,7 +50,7 @@ func (s *Session) ConvertPacket(from, to mapper.Protocol, fromCmd uint16, head, 
 	return toPacket.Marshal()
 }
 
-func (s *Session) (from, to mapper.Protocol, name string, p []byte) ([]byte, error) {
+func (s *Session) ConvertPacketByName(from, to mapper.Protocol, name string, p []byte) ([]byte, error) {
 	fromDesc := s.mapping.MessageDescMap[from][name]
 	if fromDesc == nil {
 		return p, fmt.Errorf("unknown from message %s in %s", name, from)
