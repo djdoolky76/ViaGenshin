@@ -3,8 +3,7 @@ package core
 import (
 	"encoding/json"
 
-	"github.com/Jx2f/ViaGenshin/internal/mapper"
-	"github.com/Jx2f/ViaGenshin/pkg/logger"
+	"github.com/Aliceikkk/ViaGenshin/internal/mapper"
 )
 
 type CombatInvokeEntry struct {
@@ -23,29 +22,22 @@ func (s *Session) OnCombatInvocationsNotify(from, to mapper.Protocol, data []byt
 	if err != nil {
 		return data, err
 	}
-	notify.InvokeList = s.OnCombatInvocations(from, to, notify.InvokeList)
-	return json.Marshal(notify)
-}
-
-func (s *Session) OnCombatInvocations(from, to mapper.Protocol, in []*CombatInvokeEntry) []*CombatInvokeEntry {
-	var out []*CombatInvokeEntry
-	var err error
-	for _, invoke := range in {
+	var invokes []*CombatInvokeEntry
+	for _, invoke := range notify.InvokeList {
 		if len(invoke.CombatData) == 0 {
-			out = append(out, invoke)
+			invokes = append(invokes, invoke)
 			continue
 		}
-		name := mapper.CombatTypeArguments[invoke.ArgumentType]
+		name := mapper.CombatArgumentTypes[invoke.ArgumentType]
 		if name == "" {
-			logger.Debug().Msgf("Unknown combat invoke packet %d", invoke.ArgumentType)
 			continue
 		}
 		invoke.CombatData, err = s.ConvertPacketByName(from, to, name, invoke.CombatData)
 		if err != nil {
-			logger.Debug().Err(err).Msgf("Failed to convert combat invoke packet %s", name)
-			continue
+			return data, err
 		}
-		out = append(out, invoke)
+		invokes = append(invokes, invoke)
 	}
-	return out
+	notify.InvokeList = invokes
+	return json.Marshal(notify)
 }

@@ -4,8 +4,6 @@ import (
 	"encoding/binary"
 	"sync"
 	"time"
-	
-	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -900,10 +898,7 @@ func (cb *ControlBlock) flush(ackOnly bool) uint32 {
 // 'current' - current timestamp in millisec.
 func (cb *ControlBlock) Update() {
 	var slap int32
-	if cb == nil {
-		log.Error().Msg("ControlBlock is nil")
-		return
-	}
+
 	current := currentMs()
 	if cb.updated == 0 {
 		cb.updated = 1

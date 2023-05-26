@@ -2,7 +2,6 @@ package kcp
 
 import (
 	"net"
-	"sync"
 	"time"
 )
 
@@ -10,33 +9,16 @@ const (
 	DefaultMTU = 1500
 )
 
-var (
-	unmanaged     *Listener
-	unmanagedOnce sync.Once
-)
-
 func Dial(addr string) (*Session, error) {
-	conn, err := net.ListenUDP("udp", nil)
-	if err != nil {
-		return nil, err
-	}
 	udpAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
 		return nil, err
 	}
-	unmanagedOnce.Do(func() {
-		unmanaged = &Listener{}
-		unmanaged.conns = newSessionManager(5 * time.Second)
-	})
+	conn, err := net.ListenUDP("udp", nil)
 	s := newSession(conn, udpAddr, false)
-	go loopReadFromUDP(conn, s.onControlData, s.onSegmentData)
-	if err = s.open(); err != nil {
-		return nil, err
-	}
-	unmanaged.conns.Lock()
-	unmanaged.conns.conns[s.sessionID] = s
-	unmanaged.conns.Unlock()
-	return s, nil
+	go s.loopUpdate()
+	go loopReadFromUDP(s.conn, s.onControlData, s.onSegmentData)
+	return s, s.open()
 }
 
 type Listener struct {

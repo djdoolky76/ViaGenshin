@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"os"
 	"os/signal"
@@ -9,29 +8,22 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/Jx2f/ViaGenshin/internal/config"
-	"github.com/Jx2f/ViaGenshin/internal/core"
-	"github.com/Jx2f/ViaGenshin/pkg/logger"
+	"github.com/Aliceikkk/ViaGenshin/internal/config"
+	"github.com/Aliceikkk/ViaGenshin/internal/core"
+	"github.com/Aliceikkk/ViaGenshin/pkg/logger"
 )
 
 var c *config.Config
 
 func init() {
-	f := os.Getenv("VIA_GENSHIN_CONFIG_FILE")
-	if len(os.Args) > 1 {
+	f := os.Getenv("CONFIG_FILE")
+	if f == "" && len(os.Args) > 1 {
 		f = os.Args[1]
 	}
 	if f == "" {
-		_, err := os.Stat("config.json")
-		if err != nil {
-			p, _ := json.MarshalIndent(config.DefaultConfig, "", "  ")
-			logger.Warn().Msgf("VIA_GENSHIN_CONFIG_FILE not set, here is the default config:\n%s", p)
-			logger.Warn().Msg("You can save it to a file named 'config.json' and run the program again")
-			logger.Warn().Msg("Press 'Enter' to exit ...")
-			bufio.NewReader(os.Stdin).ReadBytes('\n')
-			os.Exit(0)
-		}
-		f = "config.json"
+		p, _ := json.MarshalIndent(config.DefaultConfig, "", "  ")
+		logger.Warn().Msgf("CONFIG_FILE not set, here is the default config:\n%s", p)
+		os.Exit(0)
 	}
 	var err error
 	c, err = config.LoadConfig(f)

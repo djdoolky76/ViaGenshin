@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"net"
 	"sync"
+	"time"
 
-	"github.com/Jx2f/ViaGenshin/pkg/transport"
+	"github.com/Aliceikkk/ViaGenshin/pkg/transport"
 )
 
 type DisconnectReason uint8
@@ -92,6 +93,15 @@ func (s *Session) SendPayload(payload transport.Payload) error {
 	return nil
 }
 
+func (s *Session) loopUpdate() {
+	ticker := time.NewTicker(time.Millisecond * 20)
+	defer ticker.Stop()
+	for {
+		<-ticker.C
+		s.update()
+	}
+}
+
 func (s *Session) update() {
 	s.Lock()
 	defer s.Unlock()
@@ -122,9 +132,6 @@ func (s *Session) closeSession(reason DisconnectReason) error {
 	s.disconnect(reason)
 	if !s.isManaged {
 		// close the underlying UDP connection if the session is not managed by sessionManager
-		unmanaged.conns.Lock()
-		delete(unmanaged.conns.conns, s.sessionID)
-		unmanaged.conns.Unlock()
 		return s.conn.Close()
 	}
 	s.ctxCancel()
@@ -137,7 +144,9 @@ func (s *Session) open() error {
 	if err != nil {
 		return err
 	}
-	<-s.starting
+	select {
+	case <-s.starting:
+	}
 	return s.startErr
 }
 

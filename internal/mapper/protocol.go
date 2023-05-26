@@ -10,7 +10,7 @@ import (
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
 
-	"github.com/Jx2f/ViaGenshin/pkg/logger"
+	"github.com/Aliceikkk/ViaGenshin/pkg/logger"
 )
 
 func (m *Mapping) loadBaseProtocol() error {
@@ -43,29 +43,21 @@ func (m *Mapping) loadProtocol(v Protocol, dir string) error {
 		}
 		command, err := strconv.ParseUint(parts[1], 10, 16)
 		if err != nil {
-			logger.Warn().Err(err).Msgf("Failed to parse command %s for %s in %s", parts[1], name, v)
+			logger.Error().Err(err).Msgf("Failed to parse command %s for %s in %s", parts[1], name, v)
 			continue
 		}
 		if err := m.parseCommandDesc(parser, v, name, uint16(command)); err != nil {
-			logger.Warn().Err(err).Msgf("Failed to parse command desc for %s in %s", name, v)
+			logger.Error().Err(err).Msgf("Failed to parse command desc for %s in %s", name, v)
 			continue
 		}
 	}
-	for _, name := range AbilityInvokeArguments {
-		if name == "" {
-			continue
-		}
+	for _, name := range AbilityInvokeArgumentTypes {
 		if err := m.parseMessageDesc(parser, v, name); err != nil {
-			logger.Warn().Err(err).Msgf("Failed to parse message desc for %s in %s", name, v)
 			continue
 		}
 	}
-	for _, name := range CombatTypeArguments {
-		if name == "" {
-			continue
-		}
+	for _, name := range CombatArgumentTypes {
 		if err := m.parseMessageDesc(parser, v, name); err != nil {
-			logger.Warn().Err(err).Msgf("Failed to parse message desc for %s in %s", name, v)
 			continue
 		}
 	}

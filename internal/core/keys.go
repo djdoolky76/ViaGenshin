@@ -4,9 +4,9 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/Jx2f/ViaGenshin/internal/config"
-	"github.com/Jx2f/ViaGenshin/pkg/crypto/ec2b"
-	"github.com/Jx2f/ViaGenshin/pkg/crypto/rsa"
+	"github.com/Aliceikkk/ViaGenshin/internal/config"
+	"github.com/Aliceikkk/ViaGenshin/pkg/crypto/ec2b"
+	"github.com/Aliceikkk/ViaGenshin/pkg/crypto/rsa"
 )
 
 type Keys struct {

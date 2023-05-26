@@ -3,8 +3,7 @@ package core
 import (
 	"encoding/json"
 
-	"github.com/Jx2f/ViaGenshin/internal/mapper"
-	"github.com/Jx2f/ViaGenshin/pkg/logger"
+	"github.com/Aliceikkk/ViaGenshin/internal/mapper"
 )
 
 type AbilityInvokeEntryHead struct {
@@ -41,7 +40,23 @@ func (s *Session) OnClientAbilityChangeNotify(from, to mapper.Protocol, data []b
 	if err != nil {
 		return data, err
 	}
-	notify.Invokes = s.OnAbilityInvocations(from, to, notify.Invokes)
+	var invokes []*AbilityInvokeEntry
+	for _, invoke := range notify.Invokes {
+		if len(invoke.AbilityData) == 0 {
+			invokes = append(invokes, invoke)
+			continue
+		}
+		name := mapper.AbilityInvokeArgumentTypes[invoke.ArgumentType]
+		if name == "" {
+			continue
+		}
+		invoke.AbilityData, err = s.ConvertPacketByName(from, to, name, invoke.AbilityData)
+		if err != nil {
+			return data, err
+		}
+		invokes = append(invokes, invoke)
+	}
+	notify.Invokes = invokes
 	return json.Marshal(notify)
 }
 
@@ -55,29 +70,22 @@ func (s *Session) OnAbilityInvocationsNotify(from, to mapper.Protocol, data []by
 	if err != nil {
 		return data, err
 	}
-	notify.Invokes = s.OnAbilityInvocations(from, to, notify.Invokes)
-	return json.Marshal(notify)
-}
-
-func (s *Session) OnAbilityInvocations(from, to mapper.Protocol, in []*AbilityInvokeEntry) []*AbilityInvokeEntry {
-	var out []*AbilityInvokeEntry
-	var err error
-	for _, invoke := range in {
+	var invokes []*AbilityInvokeEntry
+	for _, invoke := range notify.Invokes {
 		if len(invoke.AbilityData) == 0 {
-			out = append(out, invoke)
+			invokes = append(invokes, invoke)
 			continue
 		}
-		name := mapper.AbilityInvokeArguments[invoke.ArgumentType]
+		name := mapper.AbilityInvokeArgumentTypes[invoke.ArgumentType]
 		if name == "" {
-			logger.Debug().Msgf("Unknown ability invoke packet %d", invoke.ArgumentType)
 			continue
 		}
 		invoke.AbilityData, err = s.ConvertPacketByName(from, to, name, invoke.AbilityData)
 		if err != nil {
-			logger.Debug().Err(err).Msgf("Failed to convert ability invoke packet %s", name)
-			continue
+			return data, err
 		}
-		out = append(out, invoke)
+		invokes = append(invokes, invoke)
 	}
-	return out
+	notify.Invokes = invokes
+	return json.Marshal(notify)
 }
